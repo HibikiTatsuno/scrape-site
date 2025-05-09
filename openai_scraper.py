@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/hibiki.tatsuno/Desktop/scrape-site/scraping_env/bin/python
 # -*- coding: utf-8 -*-
 
 import os
@@ -132,12 +132,18 @@ def parse_with_openai(html_content: str, url: str) -> Dict[str, Any]:
     - working_style_type: 勤務形態（フルリモート、完全出社など）
     - prefecture: 都道府県
     - application_default_message: 応募時に必須の質問
-    
-    稼働時間や報酬についてはテキストから適切に数値を抽出してください。
-    例えば「週3〜5日」という記述があれば、weekly_min_working_hourは3、weekly_max_working_hourは5となります。
-    「時給3000円〜5000円」という記述があれば、hourly_min_unit_priceは3000、hourly_max_unit_priceは5000となります。
-    
-    すべての項目が見つからない場合は、見つかった項目のみを返してください。数値項目は数値型で返し、見つからない場合はnullとしてください。
+
+    titleのカラムは、h1タグなどの案件のタイトルを抽出してください。
+    descriptionのカラムは、案件詳細と書かれている内容のテキストデータを抽出してください。
+    payment_method_typeのカラムは、月給という文字列があればmonthlyと入れてください。時給という文字列があればhourlyと入れてください。
+    working_day_typeのカラムは、週number〜number日という文字列があれば、低い方の数字をweekly_min_working_hourに、高い方の数字をweekly_max_working_hourに入れてください。
+    working_style_typeのカラムは、フルリモートという文字列があればremoteと入れてください。県の名前と、出社という文字列があればofficeと入れてください。
+    prefectureのカラムは、県の名前を入れてください。
+    application_default_messageのカラムは、応募時に必須の質問を入れてください。
+    hourly_min_unit_priceとhourly_max_unit_priceのカラムは、時給という文字列があれば数値を抜いて2つ以上ある場合は低い方をhourly_min_unit_priceに、高い方をhourly_max_unit_priceに入れてください。
+    monthly_min_unit_priceとmonthly_max_unit_priceのカラムは、月給や月単価という文字列があれば数値を抜いて2つ以上ある場合は低い方をmonthly_min_unit_priceに、高い方をmonthly_max_unit_priceに入れてください。
+    どちらにも該当せず、報酬という文字があれば数値を抜いて2つ以上ある場合は低い方をhourly_min_unit_priceに、高い方をhourly_max_unit_priceに入れてください。
+    ツールや仕事の経験について言及している場合には、application_default_messageにそのツールや仕事の経験について言及している文章を入れてください。
     """
     
     # HTMLコンテンツが長すぎる場合は短くする
@@ -153,7 +159,7 @@ def parse_with_openai(html_content: str, url: str) -> Dict[str, Any]:
     # APIリクエスト
     try:
         response = client.chat.completions.create(
-            model="gpt-4-turbo",  # 適切なモデルに変更
+            model="gpt-3.5-turbo",  # gpt-4-turboからgpt-3.5-turboに変更
             messages=messages,
             temperature=0.0,  # 正確な抽出のため低い温度を設定
             response_format={"type": "json_object"}  # JSON形式の応答を要求
