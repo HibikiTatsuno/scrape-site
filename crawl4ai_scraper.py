@@ -11,6 +11,19 @@ import urllib3
 from crawl4ai import CrawlerHub
 from crawl4ai.extractors import HTMLExtractor
 
+def get_api_key() -> str:
+    """
+    APIキーを環境変数から取得する
+    
+    Returns:
+        str: APIキー
+    """
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("環境変数 'OPENAI_API_KEY' が設定されていません")
+    return api_key
+
+
 # SSLの警告を無効化
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -35,36 +48,22 @@ def scrape_sokudan_with_crawl4ai(url: str) -> Dict[str, Any]:
     
     # スクレイピングするデータのスキーマを定義
     schema = {
-        "job_title": {
-            "selector": "h1", 
-            "extract": "text"
-        },
-        "job_types": {
-            "selector": ".single-job__attributes a", 
-            "extract": "text", 
-            "multiple": True
-        },
-        "required_hours": {
-            "selector": ".single-job__info-item:contains('稼働時間') .single-job__info-item-value", 
-            "extract": "text"
-        },
-        "salary": {
-            "selector": ".single-job__info-item:contains('報酬') .single-job__info-item-value", 
-            "extract": "text"
-        },
-        "area": {
-            "selector": ".single-job__info-item:contains('エリア') .single-job__info-item-value", 
-            "extract": "text"
-        },
-        "required_skills": {
-            "selector": ".single-job__skills a", 
-            "extract": "text", 
-            "multiple": True
-        },
-        "job_details": {
-            "selector": ".single-job__body", 
-            "extract": "text"
-        }
+        "title": str, # 案件のタイトル
+        "description": str, # 案件の説明
+        "payment_method_type": str, # 報酬の支払い方法
+        "weekly_min_working_hour": int, # 週の最小稼働時間
+        "weekly_max_working_hour": int, # 週の最大稼働時間
+        "monthly_min_working_hour": int, # 月の最小稼働時間
+        "monthly_max_working_hour": int, # 月の最大稼働時間
+        "hourly_min_unit_price": int, # 時給の下限
+        "hourly_max_unit_price": int, # 時給の上限
+        "monthly_min_unit_price": int, # 月の下限
+        "monthly_max_unit_price": int, # 月の上限
+        "working_day_type": str,  # 稼働日数
+        "working_style_type": str,  # フルリモートか、完全出社なのか
+        "prefecture": str,  # 都道府県
+        "application_default_message": str  # 応募時に必須の質問
+    }
     }
     
     try:
@@ -257,4 +256,4 @@ def main():
         print(json_data)
 
 if __name__ == "__main__":
-    main() 
+    main()
